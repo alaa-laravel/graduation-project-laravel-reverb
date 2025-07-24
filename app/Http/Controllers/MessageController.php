@@ -80,6 +80,30 @@ class MessageController extends Controller
         ]);
     }
 
+    public function getConversation($receiverId)
+{
+    $userId = Auth::id();
+
+    $messages = Message::where(function ($query) use ($userId, $receiverId) {
+            $query->where('sender_id', $userId)
+                  ->where('receiver_id', $receiverId);
+        })
+        ->orWhere(function ($query) use ($userId, $receiverId) {
+            $query->where('sender_id', $receiverId)
+                  ->where('receiver_id', $userId);
+        })
+        ->orderBy('created_at', 'asc')
+        ->with('sender:id,name')
+        ->get();
+
+    return response()->json([
+        'status' => 200,
+        'message' => 'Conversation loaded successfully',
+        'data' => $messages
+    ]);
+}
+
+
     public function destroy($id)
     {
         $message = Message::find($id);
