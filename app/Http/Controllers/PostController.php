@@ -23,7 +23,6 @@ class PostController extends Controller
         ]);
     }
 
-
     public function store(StorepostRequest $request)
     {
         $post = $request->validated();
@@ -38,12 +37,12 @@ class PostController extends Controller
         ]);
     }
 
-
     public function show($id)
     {
 
         $one_post = Post::with([
-            'comments.user:id,name'])->find($id);
+            'comments.user:id,name'
+        ])->find($id);
 
         if (!$one_post) {
             return response()->json([
@@ -58,7 +57,6 @@ class PostController extends Controller
             'data' => $one_post,
         ]);
     }
-
 
     public function update(UpdatePostRequest $request, $id)
     {

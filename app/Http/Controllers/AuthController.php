@@ -28,9 +28,9 @@ class AuthController extends Controller
 
     public function register(StoreUserRequest $request)
     {
-        $user = $request->validated();
-        $user['password'] = bcrypt($user['password']);
-        $user = User::create($user);
+        $data = $request->validated();
+        $data['password'] = bcrypt($data['password']);
+        $user = User::create($data);
         $user->load('gradelevel:id,grade_level');
 
         return response()->json([
@@ -74,7 +74,7 @@ class AuthController extends Controller
             'new_password' => 'required|min:6',
         ]);
 
-        $user = auth()->user();
+        $user = Auth::user();
 
         if (!Hash::check($request->old_password, $user->password)) {
             return response()->json([
@@ -134,13 +134,13 @@ class AuthController extends Controller
     {
         $validatedData = $request->validated();
 
-        $user = auth()->user(); // بدل من User::findOrFail($id)
+        $user = Auth::user();
 
         if (!$user) {
             return response()->json([
                 'status' => 401,
                 'message' => 'Unauthenticated',
-            ], 401);
+            ]);
         }
 
         if (isset($validatedData['password'])) {
@@ -160,7 +160,7 @@ class AuthController extends Controller
 
     public function destroy()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $user->delete();
         return response()->json([
             'status' => 200,

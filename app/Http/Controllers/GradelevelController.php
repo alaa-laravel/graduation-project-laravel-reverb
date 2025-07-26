@@ -25,9 +25,9 @@ class GradelevelController extends Controller
 
     public function store(StoregradelevelRequest $request)
     {
-        $grade_level = $request->validated();
+        $data = $request->validated();
 
-        $grade_level = gradelevel::create($grade_level);
+        $grade_level = gradelevel::create($data);
 
         return response()->json([
             'status' => 200,

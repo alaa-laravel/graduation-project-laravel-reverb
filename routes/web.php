@@ -6,5 +6,3 @@ use Illuminate\Support\Facades\Broadcast;
 Route::get('/', function () {
     return view('welcome');
 });
-Route::view('/listen', 'listen');
-Broadcast::routes();

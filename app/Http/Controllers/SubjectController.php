@@ -8,9 +8,7 @@ use App\Http\Requests\UpdatesubjectRequest;
 
 class SubjectController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
         $subjects = Subject::select('id', 'name', 'grade_level_id')
@@ -24,9 +22,6 @@ class SubjectController extends Controller
             'data' => $subjects,
         ]);
     }
-
-
-
 
     public function store(StoresubjectRequest $request)
     {

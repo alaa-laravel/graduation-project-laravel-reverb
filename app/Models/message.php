@@ -23,7 +23,7 @@ class message extends Model
         return $this->belongsTo(User::class, 'receiver_id');
     }
 
-     public function canEditOrDelete(): bool
+    public function canEditOrDelete(): bool
     {
         return $this->created_at->gt(now()->subMinutes(20));
     }

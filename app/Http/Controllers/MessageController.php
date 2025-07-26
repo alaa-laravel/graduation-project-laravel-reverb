@@ -14,13 +14,7 @@ use App\Http\Requests\UpdatemessageRequest;
 
 class MessageController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
+
 
     public function store(StoremessageRequest $request)
     {
@@ -38,70 +32,49 @@ class MessageController extends Controller
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(message $message)
-    {
-        //
-    }
-
-
-
-    public function update(Request $request, $id)
-    {
-        $message = Message::find($id);
-
-        if (!$message) {
-            return response()->json(['message' => 'Message not found'], 404);
-        }
-
-        if ($message->sender_id !== Auth::id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        // تحقق من مرور أكثر من 20 دقيقة
-        if (!$message->created_at || $message->created_at->diffInMinutes(now()) > 20) {
-            return response()->json(['message' => 'Cannot edit after 20 minutes'], 403);
-        }
-
-        $request->validate([
-            'message' => 'required|string',
-        ]);
-
-        $message->update(['message' => $request->message]);
-
-        broadcast(new MessageUpdated($message))->toOthers();
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'Message updated successfully',
-            'data' => $message,
-        ]);
-    }
-
-    public function getConversation($receiverId)
+ public function update(UpdatemessageRequest $request, $id)
 {
-    $userId = Auth::id();
+    $message = Message::find($id);
 
-    $messages = Message::where(function ($query) use ($userId, $receiverId) {
-            $query->where('sender_id', $userId)
-                  ->where('receiver_id', $receiverId);
-        })
-        ->orWhere(function ($query) use ($userId, $receiverId) {
-            $query->where('sender_id', $receiverId)
-                  ->where('receiver_id', $userId);
-        })
-        ->orderBy('created_at', 'asc')
-        ->with('sender:id,name')
-        ->get();
+    if (!$message) {
+        return response()->json(['message' => 'Message not found'], 404);
+    }
+
+    if ($message->sender_id !== Auth::id()) {
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    if (!$message->canEditOrDelete()) {
+        return response()->json(['message' => 'Cannot edit after 20 minutes'], 403);
+    }
+
+    $message->update($request->only(['message', 'is_read']));
+
+    broadcast(new MessageUpdated($message))->toOthers();
 
     return response()->json([
         'status' => 200,
-        'message' => 'Conversation loaded successfully',
-        'data' => $messages
+        'message' => 'Message updated successfully',
+        'data' => $message,
     ]);
 }
+
+    public function getConversation($receiverId)
+    {
+        $userId = Auth::id();
+
+  $messages = Message::whereIn('sender_id', [$userId, $receiverId])
+                   ->whereIn('receiver_id', [$userId, $receiverId])
+                   ->orderBy('created_at', 'asc')
+                   ->with('sender:id,name')
+                   ->get();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Conversation loaded successfully',
+            'data' => $messages
+        ]);
+    }
 
 
     public function destroy($id)

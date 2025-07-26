@@ -51,18 +51,22 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    
     public function posts()
     {
         return $this->hasMany(POst::class);
     }
+
     public function comments()
     {
         return $this->hasMany(Comment::class);
     }
+
     public function gradelevel()
     {
         return $this->belongsTo(gradelevel::class, 'grade_level_id');
     }
+
     public function sentMessages()
     {
         return $this->hasMany(Message::class, 'sender_id');
@@ -72,5 +76,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(Message::class, 'receiver_id');
     }
-   
 }
